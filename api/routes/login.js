@@ -24,7 +24,7 @@ router.post("/login", async (req, res) => {
     if (existingUser) {
       // 3. User exists → generate backend JWT token
       const token = jwt.sign({ uid: existingUser.uid }, JWT_SECRET, {
-        expiresIn: "7d",
+        expiresIn: "30d",
       });
 
       return res.json({
@@ -33,7 +33,7 @@ router.post("/login", async (req, res) => {
         token,
       });
     } else {
-        const token = jwt.sign({ uid }, JWT_SECRET, { expiresIn: "1h" });
+      const token = jwt.sign({ uid }, JWT_SECRET, { expiresIn: "30d" });
       // 4. User not found
       return res.json({
         registered: false,
