@@ -28,17 +28,15 @@ router.post("/login", async (req, res) => {
       });
 
       return res.json({
-        registered: true,
-        uid,
-        token,
+        user: existingUser,
+        token: token,
       });
     } else {
       const token = jwt.sign({ uid }, JWT_SECRET, { expiresIn: "30d" });
       // 4. User not found
       return res.json({
-        registered: false,
-        uid,
-        token,
+        user: null,
+        token: token,
       });
     }
   } catch (err) {
