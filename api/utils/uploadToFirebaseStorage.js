@@ -6,11 +6,12 @@ const fs = require("fs");
 
 const bucket = admin.storage().bucket();
 
-async function uploadFileToStorage(file) {
+async function uploadFileToStorage(file, folder, customFileName = null) {
   const tempFilePath = path.join(os.tmpdir(), file.originalname);
   fs.writeFileSync(tempFilePath, file.buffer);
+  const fileName = customFileName || file.originalname;
 
-  const storageFileName = `profilePhotos/${file.originalname}`;
+  const storageFileName = `${folder}/${fileName}`;
   const uploadOptions = {
     destination: storageFileName,
     metadata: {
@@ -34,4 +35,27 @@ async function uploadFileToStorage(file) {
   return downloadURL;
 }
 
-module.exports = uploadFileToStorage;
+async function deleteFromFirebaseStorage(publicUrl) {
+  try {
+    const decodedUrl = decodeURIComponent(publicUrl);
+    const match = decodedUrl.match(/\/o\/(.*?)\?alt=/);
+
+    if (!match || !match[1]) {
+      console.warn(
+        "Invalid Firebase Storage URL. Could not extract file path."
+      );
+      return;
+    }
+
+    const filePath = match[1];
+    await bucket.file(filePath).delete();
+    console.log(`Deleted from Firebase: ${filePath}`);
+  } catch (err) {
+    console.error("❌ Failed to delete file from Firebase:", err.message);
+  }
+}
+
+module.exports = {
+  uploadFileToStorage,
+  deleteFromFirebaseStorage,
+};

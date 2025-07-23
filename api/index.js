@@ -10,8 +10,10 @@ app.use(express.json());
 
 const loginRoute = require("./routes/login");
 const registerRoute = require("./routes/register");
+const home = require("./routes/home");
 app.use("/auth", loginRoute);
 app.use("/auth", registerRoute);
+app.use("/home", home);
 
 // For testing and checking health status
 app.get("/", (req, res) => {

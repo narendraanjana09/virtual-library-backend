@@ -38,7 +38,7 @@ router.post(
           .json({ error: "Mobile number is already in use" });
       }
 
-      const imageUrl = await uploadToFirebaseStorage(req.file);
+      const imageUrl = await uploadToFirebaseStorage(req.file, "profilePhotos");
 
       const userData = {
         uid,
