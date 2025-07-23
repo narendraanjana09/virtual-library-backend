@@ -15,10 +15,27 @@ router.post(
   async (req, res) => {
     try {
       const uid = req.uid;
+      const email = req.body.email;
+      const mobile = req.body.mobile;
 
-      const existing = await User.findOne({ uid });
-      if (existing) {
-        return res.status(400).json({ error: "User already registered" });
+      const existingUid = await User.findOne({ uid });
+      const existingEmail = await User.findOne({ email });
+      const existingMobile = await User.findOne({ mobile });
+
+      if (existingUid) {
+        return res
+          .status(400)
+          .json({ error: "User with this UID is already registered" });
+      }
+
+      if (existingEmail) {
+        return res.status(400).json({ error: "Email is already in use" });
+      }
+
+      if (existingMobile) {
+        return res
+          .status(400)
+          .json({ error: "Mobile number is already in use" });
       }
 
       const imageUrl = await uploadToFirebaseStorage(req.file);
@@ -27,8 +44,8 @@ router.post(
         uid,
         profilePhotoUrl: imageUrl,
         name: req.body.name,
-        email: req.body.email,
-        mobile: req.body.mobile,
+        email: email,
+        mobile: mobile,
         gender: req.body.gender,
         college: req.body.college,
         city: req.body.city,
