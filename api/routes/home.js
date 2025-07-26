@@ -6,7 +6,7 @@ const User = require("../models/User");
 const LibraryConfig = require("../models/LibraryConfig");
 const WhatsAppGroup = require("../models/WhatsAppGroup");
 const {
-  uploadToFirebaseStorage,
+  uploadFileToStorage,
   deleteFromFirebaseStorage,
 } = require("../utils/uploadToFirebaseStorage");
 
@@ -27,9 +27,15 @@ router.get("/connect", verifyJWT, async (req, res) => {
     if (!config) {
       config = await LibraryConfig.create({});
     }
+    const allowedExams = ["FMGE", "NEET PG", "INICT"];
+    const configData = config.toObject();
+
+    if (!allowedExams.includes(user.exam)) {
+      configData.whatsappGroups = [];
+    }
     return res.json({
       user: user,
-      libraryConfig: config,
+      libraryConfig: configData,
     });
   } catch (err) {
     console.error("Connect Error:", err);
@@ -56,7 +62,7 @@ router.put(
     if (!req.file) {
       return res.status(400).json({ error: "heroImage file is required" });
     }
-    const imageUrl = await uploadToFirebaseStorage(
+    const imageUrl = await uploadFileToStorage(
       req.file,
       "appData",
       "heroImage"
@@ -88,7 +94,7 @@ router.post(
       const cfg = await getConfig();
 
       // Upload file to Firebase
-      const photoUrl = await uploadToFirebaseStorage(
+      const photoUrl = await uploadFileToStorage(
         req.file,
         "whatsapp-groups",
         null // filename is optional, use original
@@ -126,7 +132,7 @@ router.delete("/config/whatsapp-group/:index", verifyJWT, async (req, res) => {
 
   cfg.whatsappGroups.splice(index, 1);
   await cfg.save();
-  res.json({ message: "Group deleted", whatsappGroups: cfg.whatsappGroups });
+  res.json({ message: "Group deleted" });
 });
 
 // Add Admin Email
