@@ -33,9 +33,11 @@ router.get("/connect", verifyJWT, async (req, res) => {
     if (!allowedExams.includes(user.exam)) {
       configData.whatsappGroups = [];
     }
+    const isAdmin = config.adminAccessEmails.includes(user.email);
     return res.json({
       user: user,
       libraryConfig: configData,
+      isAdmin: isAdmin,
     });
   } catch (err) {
     console.error("Connect Error:", err);
