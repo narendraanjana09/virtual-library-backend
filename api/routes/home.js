@@ -122,18 +122,16 @@ router.post(
 
 router.delete("/config/whatsapp-group", verifyJWT, async (req, res) => {
   try {
-    const { groupId } = req.body;
-    if (!groupId) {
+    const { index } = req.body;
+    if (!index) {
       return res.status(400).json({ error: "Group ID is required" });
     }
 
     const cfg = await getConfig();
-    const groupIndex = cfg.whatsappGroups.findIndex((g) => g._id === groupId);
+    const groupIndex = cfg.whatsappGroups.findIndex((g) => g.index === index);
 
     if (groupIndex === -1) {
-      return res
-        .status(404)
-        .json({ error: "Group not found" + groupId + " " + groupIndex });
+      return res.status(404).json({ error: "Group not found" });
     }
 
     const group = cfg.whatsappGroups[groupIndex];
