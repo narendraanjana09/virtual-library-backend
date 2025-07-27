@@ -120,21 +120,38 @@ router.post(
   }
 );
 
-router.delete("/config/whatsapp-group/:index", verifyJWT, async (req, res) => {
-  const index = parseInt(req.params.index, 10);
-  const cfg = await getConfig();
+router.delete("/config/whatsapp-group", verifyJWT, async (req, res) => {
+  try {
+    const groupIdToDelete = req.body._id;
+    if (!groupIdToDelete) {
+      return res.status(400).json({ error: "Group ID is required" });
+    }
 
-  if (index < 0 || index >= cfg.whatsappGroups.length) {
-    return res.status(404).json({ error: "Group not found" });
+    const cfg = await getConfig();
+    const groupIndex = cfg.whatsappGroups.findIndex(
+      (g) => g._id === groupIdToDelete
+    );
+
+    if (groupIndex === -1) {
+      return res.status(404).json({ error: "Group not found" });
+    }
+
+    const group = cfg.whatsappGroups[groupIndex];
+
+    // Delete group photo from Firebase
+    if (group.groupPhotoUrl) {
+      await deleteFromFirebaseStorage(group.groupPhotoUrl);
+    }
+
+    // Remove from array
+    cfg.whatsappGroups.splice(groupIndex, 1);
+    await cfg.save();
+
+    res.json({ message: "Group deleted", whatsappGroups: cfg.whatsappGroups });
+  } catch (err) {
+    console.error("Delete WhatsApp Group Error:", err);
+    res.status(500).json({ error: "Server error while deleting group" });
   }
-
-  const group = cfg.whatsappGroups[index];
-  const imageUrl = group.groupPhotoUrl;
-  await deleteFromFirebaseStorage(group.groupPhotoUrl);
-
-  cfg.whatsappGroups.splice(index, 1);
-  await cfg.save();
-  res.json({ message: "Group deleted" });
 });
 
 // Add Admin Email
