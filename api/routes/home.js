@@ -122,7 +122,7 @@ router.post(
 
 router.delete("/config/whatsapp-group", verifyJWT, async (req, res) => {
   try {
-    const groupIdToDelete = req.body._id;
+    const groupIdToDelete = req.body.groupId;
     if (!groupIdToDelete) {
       return res.status(400).json({ error: "Group ID is required" });
     }
