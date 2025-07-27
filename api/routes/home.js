@@ -84,7 +84,8 @@ router.post(
   upload.single("groupPhoto"), // Expect file field named `groupPhoto`
   async (req, res) => {
     try {
-      const { groupName, groupInvitationLink } = req.body;
+      const groupName = req.body.groupName;
+      const groupInvitationLink = req.body.groupInvitationLink;
 
       // Validate required fields
       if (!groupName || !groupInvitationLink || !req.file) {
