@@ -18,14 +18,14 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
 
     const plans = isPremiumExam
       ? [
-          { durationInMonths: 1, price: 199 },
-          { durationInMonths: 6, price: 699 },
           { durationInMonths: 12, price: 999 },
+          { durationInMonths: 6, price: 699 },
+          { durationInMonths: 1, price: 199 },
         ]
       : [
-          { durationInMonths: 1, price: 149 },
-          { durationInMonths: 6, price: 499 },
           { durationInMonths: 12, price: 699 },
+          { durationInMonths: 6, price: 499 },
+          { durationInMonths: 1, price: 149 },
         ];
 
     res.json({
