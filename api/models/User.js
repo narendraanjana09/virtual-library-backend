@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
   pro: {
     isActive: { type: Boolean, default: false },
-    planType: { type: String, enum: ["monthly", "annual"], default: null },
+    planType: { type: String, default: null },
     startDate: Date,
     endDate: Date,
     paidAmount: Number,
@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
   payments: [
     {
       amount: Number,
-      planType: { type: String, enum: ["monthly", "annual"] },
+      planType: String,
       startDate: Date,
       endDate: Date,
       razorpayOrderId: String,
