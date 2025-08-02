@@ -11,9 +11,11 @@ app.use(express.json());
 const loginRoute = require("./routes/login");
 const registerRoute = require("./routes/register");
 const home = require("./routes/home");
+const payment = require("./routes/payment");
 app.use("/auth", loginRoute);
 app.use("/auth", registerRoute);
 app.use("/home", home);
+app.use("/home", payment);
 
 // For testing and checking health status
 app.get("/", (req, res) => {

@@ -13,6 +13,28 @@ const userSchema = new mongoose.Schema({
   exam: String,
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  pro: {
+    isActive: { type: Boolean, default: false },
+    planType: { type: String, enum: ["monthly", "annual"], default: null },
+    startDate: Date,
+    endDate: Date,
+    paidAmount: Number,
+    razorpayOrderId: String,
+    razorpayPaymentId: String,
+    razorpaySignature: String,
+  },
+  payments: [
+    {
+      amount: Number,
+      planType: { type: String, enum: ["monthly", "annual"] },
+      startDate: Date,
+      endDate: Date,
+      razorpayOrderId: String,
+      razorpayPaymentId: String,
+      razorpaySignature: String,
+      createdAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);

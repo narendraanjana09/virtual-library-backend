@@ -6,8 +6,6 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const uploadToFirebaseStorage = require("../utils/uploadToFirebaseStorage");
 
-const JWT_SECRET = process.env.JWT_SECRET;
-
 router.post(
   "/register",
   verifyJWT,
@@ -51,6 +49,17 @@ router.post(
         city: req.body.city,
         state: req.body.state,
         exam: req.body.exam,
+        pro: {
+          isActive: false,
+          planType: null,
+          startDate: null,
+          endDate: null,
+          paidAmount: null,
+          razorpayOrderId: null,
+          razorpayPaymentId: null,
+          razorpaySignature: null,
+        },
+        payments: [],
       };
 
       const newUser = await User.create(userData);
