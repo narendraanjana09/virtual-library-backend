@@ -124,7 +124,7 @@ router.post(
 router.delete("/config/whatsapp-group", verifyJWT, async (req, res) => {
   try {
     const { index } = req.body;
-    if (!index) {
+    if (index === undefined || index === null) {
       return res.status(400).json({ error: "Group Index is required" });
     }
 
