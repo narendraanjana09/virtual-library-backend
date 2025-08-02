@@ -16,20 +16,17 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
     const exam = user.exam;
     const isPremiumExam = ["NEET PG", "INICT", "FMGE"].includes(exam);
 
-    let plans;
-    if (isPremiumExam) {
-      plans = {
-        one_month: 199,
-        six_month: 699,
-        twelve_month: 999,
-      };
-    } else {
-      plans = {
-        one_month: 149,
-        six_month: 499,
-        twelve_month: 699,
-      };
-    }
+    const plans = isPremiumExam
+      ? [
+          { durationInMonths: 1, price: 199 },
+          { durationInMonths: 6, price: 699 },
+          { durationInMonths: 12, price: 999 },
+        ]
+      : [
+          { durationInMonths: 1, price: 149 },
+          { durationInMonths: 6, price: 499 },
+          { durationInMonths: 12, price: 699 },
+        ];
 
     res.json({
       isPremiumExam: isPremiumExam,
