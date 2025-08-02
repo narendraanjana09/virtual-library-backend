@@ -4,7 +4,10 @@ const upload = require("multer")(); // Handles multipart/form-data
 const verifyJWT = require("../middleware/verifyJWT");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-const uploadToFirebaseStorage = require("../utils/uploadToFirebaseStorage");
+const {
+  uploadFileToStorage,
+  deleteFromFirebaseStorage,
+} = require("../utils/uploadToFirebaseStorage");
 
 router.post(
   "/register",
@@ -36,7 +39,7 @@ router.post(
           .json({ error: "Mobile number is already in use" });
       }
 
-      const imageUrl = await uploadToFirebaseStorage(req.file, "profilePhotos");
+      const imageUrl = await uploadFileToStorage(req.file, "profilePhotos");
 
       const userData = {
         uid,
