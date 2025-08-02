@@ -22,16 +22,22 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
             id: "34eaf2db-4e0e-45d0-b0d0-2d5a2c3e7498",
             durationInMonths: 12,
             price: 999,
+            title: "Annual Pro Plan",
+            subtitle: "Valid for 1 Year",
           },
           {
             id: "176b3e22-d819-4015-82ab-f875c17cb4f2",
             durationInMonths: 6,
             price: 699,
+            title: "Half-Yearly Pro Plan",
+            subtitle: "Valid for 6 Months",
           },
           {
             id: "6f08e545-8ad3-4df8-9176-8b9f26365df7",
             durationInMonths: 1,
             price: 199,
+            title: "Monthly Pro Plan",
+            subtitle: "Valid for 1 Month",
           },
         ]
       : [
@@ -39,16 +45,22 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
             id: "f4d1c30d-5b72-4ec1-95a9-efb0e9279a34",
             durationInMonths: 12,
             price: 699,
+            title: "Annual Pro Plan",
+            subtitle: "Valid for 1 Year",
           },
           {
             id: "9e64c598-29d1-4e62-932d-7a535fd0f174",
             durationInMonths: 6,
             price: 499,
+            title: "Half-Yearly Pro Plan",
+            subtitle: "Valid for 6 Months",
           },
           {
             id: "a49d0b95-b33d-49ea-865c-41eb09cd1f49",
             durationInMonths: 1,
             price: 149,
+            title: "Monthly Pro Plan",
+            subtitle: "Valid for 1 Month",
           },
         ];
 
