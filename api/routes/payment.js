@@ -4,6 +4,7 @@ const verifyJWT = require("../middleware/verifyJWT");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 const razorpay = require("../razorpay");
+const crypto = require("crypto");
 
 router.get("/pro-plans", verifyJWT, async (req, res) => {
   try {
@@ -95,6 +96,68 @@ router.post("/create-order", verifyJWT, async (req, res) => {
   } catch (err) {
     console.error("Create Order Error:", err);
     res.status(500).json({ error: "Failed to create Razorpay order" });
+  }
+});
+
+router.post("/verify", verifyJWT, async (req, res) => {
+  try {
+    const {
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      planDurationInMonths,
+      planType,
+      amount,
+    } = req.body;
+
+    const expectedSignature = crypto
+      .createHmac("sha256", process.env.RAZORPAY_SECRET)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest("hex");
+
+    if (expectedSignature !== razorpay_signature) {
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    const user = await User.findOne({ uid: req.uid });
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    const now = new Date();
+    const endDate = new Date(now);
+    endDate.setMonth(endDate.getMonth() + planDurationInMonths);
+
+    // 1. Update current pro plan
+    user.pro = {
+      isActive: true,
+      planType,
+      startDate: now,
+      endDate,
+      paidAmount: amount,
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+    };
+
+    // 2. Push into payment history
+    user.payments.push({
+      amount,
+      planType,
+      startDate: now,
+      endDate,
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      razorpaySignature: razorpay_signature,
+    });
+
+    await user.save();
+
+    return res.json({
+      message: "Payment verified and pro activated",
+      user: user,
+    });
+  } catch (err) {
+    console.error("Verify Payment Error:", err);
+    res.status(500).json({ error: "Failed to verify payment" });
   }
 });
 
