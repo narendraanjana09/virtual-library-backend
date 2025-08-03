@@ -3,6 +3,7 @@ const router = express.Router();
 const verifyJWT = require("../middleware/verifyJWT");
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+const razorpay = require("../razorpay");
 
 router.get("/pro-plans", verifyJWT, async (req, res) => {
   try {
@@ -71,6 +72,29 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
   } catch (err) {
     console.error("Get Pro Plans Error:", err);
     res.status(500).json({ error: "Failed to fetch plans" });
+  }
+});
+
+router.post("/create-order", verifyJWT, async (req, res) => {
+  try {
+    const { amount, planDurationInMonths } = req.body;
+
+    const options = {
+      amount: amount * 100, // e.g., 19900 for ₹199.00
+      currency: "INR",
+      receipt: `receipt_${Date.now()}`,
+      notes: {
+        uid: req.uid,
+        planDurationInMonths,
+      },
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    return res.json({ order });
+  } catch (err) {
+    console.error("Create Order Error:", err);
+    res.status(500).json({ error: "Failed to create Razorpay order" });
   }
 });
 
