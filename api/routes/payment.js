@@ -212,6 +212,17 @@ router.post(
           return res.status(200).json({ status: "ok" });
         }
 
+        const paymentExists = user.payments.some(
+          (p) => p.razorpayPaymentId === payment.id
+        );
+
+        if (paymentExists) {
+          console.log(
+            `⚠️ Payment ${payment.id} already processed for UID: ${uid}`
+          );
+          return res.status(200).json({ status: "ok" });
+        }
+
         const now = new Date();
         const endDate = new Date(now);
         endDate.setMonth(endDate.getMonth() + planDurationInMonths);
