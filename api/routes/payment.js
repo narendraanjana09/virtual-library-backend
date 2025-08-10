@@ -161,4 +161,94 @@ router.post("/verify", verifyJWT, async (req, res) => {
   }
 });
 
+router.post(
+  "/razorpay",
+  express.json({ type: "application/json" }),
+  async (req, res) => {
+    const webhookSecret = process.env.RAZORPAY_WEBHOOK_SECRET;
+    const receivedSignature = req.headers["x-razorpay-signature"];
+
+    // Verify webhook signature
+    const generatedSignature = crypto
+      .createHmac("sha256", webhookSecret)
+      .update(JSON.stringify(req.body))
+      .digest("hex");
+
+    if (generatedSignature !== receivedSignature) {
+      console.error("Invalid webhook signature");
+      return res.status(400).json({ error: "Invalid signature" });
+    }
+
+    try {
+      const event = req.body;
+
+      if (event.event === "payment.captured") {
+        const payment = event.payload.payment.entity;
+
+        const uid = payment.notes?.uid; // You should have set this in order notes
+        const planDurationInMonths = parseInt(
+          payment.notes?.planDurationInMonths,
+          10
+        );
+        const planType = planDurationInMonths
+          ? planDurationInMonths === 1
+            ? "Monthly"
+            : planDurationInMonths === 6
+            ? "Half Yearly"
+            : planDurationInMonths === 12
+            ? "Yearly"
+            : null
+          : null;
+        const amount = payment.amount / 100;
+
+        if (!uid || !planDurationInMonths) {
+          console.error("Missing payment notes data");
+          return res.status(200).json({ status: "ok" }); // Ack but skip processing
+        }
+
+        const user = await User.findOne({ uid });
+        if (!user) {
+          console.error("User not found for UID:", uid);
+          return res.status(200).json({ status: "ok" });
+        }
+
+        const now = new Date();
+        const endDate = new Date(now);
+        endDate.setMonth(endDate.getMonth() + planDurationInMonths);
+
+        // Update pro details
+        user.pro = {
+          isActive: true,
+          planType,
+          startDate: now,
+          endDate,
+          paidAmount: amount,
+          razorpayOrderId: payment.order_id,
+          razorpayPaymentId: payment.id,
+          razorpaySignature: null, // Webhook doesn't have signature
+        };
+
+        // Add to payments history
+        user.payments.push({
+          amount,
+          planType,
+          startDate: now,
+          endDate,
+          razorpayOrderId: payment.order_id,
+          razorpayPaymentId: payment.id,
+          razorpaySignature: null,
+        });
+
+        await user.save();
+        console.log("✅ Webhook processed for UID:", uid);
+      }
+
+      res.status(200).json({ status: "ok" }); // Always ack to Razorpay
+    } catch (error) {
+      console.error("Webhook Processing Error:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  }
+);
+
 module.exports = router;
