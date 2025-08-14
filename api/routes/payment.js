@@ -186,6 +186,7 @@ router.post(
         const payment = event.payload.payment.entity;
 
         const uid = payment.notes?.uid; // You should have set this in order notes
+        console.log(`Webhook Called ${uid}`);
         const planDurationInMonths = parseInt(
           payment.notes?.planDurationInMonths,
           10
@@ -216,7 +217,12 @@ router.post(
           (p) => p.razorpayPaymentId === payment.id
         );
 
-        if (paymentExists) {
+        // Check if order already exists by Order ID
+        const orderExists = user.payments.some(
+          (p) => p.razorpayOrderId === payment.order_id
+        );
+
+        if (paymentExists || orderExists) {
           console.log(
             `⚠️ Payment ${payment.id} already processed for UID: ${uid}`
           );
