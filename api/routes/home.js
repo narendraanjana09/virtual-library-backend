@@ -19,10 +19,20 @@ async function getConfig() {
 router.get("/connect", verifyJWT, async (req, res) => {
   try {
     const uid = req.uid;
-    const user = await User.findOne({ uid });
+    let user = await User.findOne({ uid });
     if (!user) {
       return res.status(404).json({ error: "User not found" });
     }
+
+    if (user.pro && user.pro.isActive && user.pro.endDate) {
+      const now = new Date();
+      const endDate = new Date(user.pro.endDate);
+      if (now > endDate) {
+        user.pro.isActive = false;
+        user = await user.save();
+      }
+    }
+
     let config = await LibraryConfig.findOne();
     if (!config) {
       config = await LibraryConfig.create({});
