@@ -19,7 +19,7 @@ app.use("/auth", registerRoute);
 app.use("/home", home);
 app.use("/home", payment);
 
-const ExtensionData = require("./models/ExtensionData");
+const ExtensionDay = require("./models/ExtensionDay");
 
 // For testing and checking health status
 app.get("/", (req, res) => {
@@ -28,24 +28,62 @@ app.get("/", (req, res) => {
 
 app.post("/extension-data", async (req, res) => {
   try {
-    const data = req.body;
+    const payload = req.body || {};
 
-    console.log("Extension data received:", data);
+    // Accept payload.date if provided, otherwise compute server-side UTC date
+    let date = payload.date;
+    if (!date) {
+      const d = new Date();
+      const yyyy = d.getUTCFullYear();
+      const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(d.getUTCDate()).padStart(2, "0");
+      date = `${yyyy}-${mm}-${dd}`;
+    }
 
-    const updated = await ExtensionData.findOneAndUpdate(
-      {}, // match first (only) document
-      { data }, // replace data field with latest body
-      { upsert: true, new: true } // create if not exists, return updated
+    const meetingId = payload.meetingId || "";
+    const tickAt = payload.tickAt || Math.floor(Date.now() / 1000);
+    const usersObj = payload.users || {}; // expect { userId: { ... } } or array?
+
+    // If client sends users as array, convert to map keyed by userId
+    let usersMap = {};
+    if (Array.isArray(usersObj)) {
+      for (const u of usersObj) {
+        if (!u || !u.userId) continue;
+        usersMap[u.userId] = u;
+      }
+    } else {
+      usersMap = usersObj;
+    }
+
+    // Upsert by date + meetingId: replace users snapshot and update tickAt.
+    const filter = { date, meetingId };
+    const update = {
+      $set: {
+        tickAt,
+        users: usersMap,
+      },
+    };
+    const opts = { upsert: true, new: true, setDefaultsOnInsert: true };
+
+    const doc = await ExtensionDay.findOneAndUpdate(filter, update, opts);
+
+    console.log(
+      `Extension data saved for date=${date} meeting=${meetingId} users=${
+        Object.keys(usersMap).length
+      }`
     );
 
     res.json({
-      message: "Extension data saved/updated successfully",
-      savedId: updated._id,
-      received: data,
+      message: "Extension day data saved",
+      date,
+      meetingId,
+      id: doc._id,
     });
-  } catch (error) {
-    console.error("Error saving extension data:", error);
-    res.status(500).json({ error: "Error saving extension data" });
+  } catch (err) {
+    console.error("Error saving extension-day data:", err);
+    res
+      .status(500)
+      .json({ error: "Error saving extension-day data", details: err.message });
   }
 });
 
