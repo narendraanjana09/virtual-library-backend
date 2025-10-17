@@ -17,9 +17,34 @@ app.use("/auth", registerRoute);
 app.use("/home", home);
 app.use("/home", payment);
 
+const ExtensionData = require("./models/ExtensionData");
+
 // For testing and checking health status
 app.get("/", (req, res) => {
   res.send("Connected to Virtual Library Backend Successfully 👾🥳");
+});
+
+app.post("/extension-data", async (req, res) => {
+  try {
+    const data = req.body;
+
+    console.log("Extension data received:", data);
+
+    const updated = await ExtensionData.findOneAndUpdate(
+      {}, // match first (only) document
+      { data }, // replace data field with latest body
+      { upsert: true, new: true } // create if not exists, return updated
+    );
+
+    res.json({
+      message: "Extension data saved/updated successfully",
+      savedId: updated._id,
+      received: data,
+    });
+  } catch (error) {
+    console.error("Error saving extension data:", error);
+    res.status(500).json({ error: "Error saving extension data" });
+  }
 });
 
 app.get("/admin-test", async (req, res) => {
