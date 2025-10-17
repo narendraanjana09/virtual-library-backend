@@ -3,6 +3,8 @@ const mongoose = require("mongoose");
 const app = express();
 const connectDB = require("./db");
 const admin = require("./firebase");
+const cors = require("cors");
+app.use(cors()); // or use custom middleware (Option B)
 
 connectDB();
 
