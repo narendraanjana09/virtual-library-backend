@@ -96,7 +96,7 @@ app.get("/extension-data/:date", async (req, res) => {
         .json({ error: "Invalid or missing date (use YYYY-MM-DD)" });
     }
 
-    const doc = await ExtensionDay.findOne({ date });
+    const doc = await ExtensionDay.findOne({ date }).lean();
 
     if (!doc) {
       return res
@@ -104,15 +104,38 @@ app.get("/extension-data/:date", async (req, res) => {
         .json({ message: "No data found for this date", date });
     }
 
-    res.json({
+    // convert users map/object to array with only required fields
+    const usersObj = doc.users || {};
+    const usersArray = Object.keys(usersObj).map((k) => {
+      const u = usersObj[k] || usersObj.get?.(k) || {};
+      return {
+        userId: u.userId || k,
+        name: u.name || null,
+        imgUrl: u.imgUrl || null,
+        totalSeconds: Number(u.totalSeconds || 0),
+        present: !!u.present,
+        firstSeen: u.firstSeen || null,
+        lastSeen: u.lastSeen || null,
+        joinCount: Number(u.joinCount || 0),
+      };
+    });
+
+    // optionally sort by totalSeconds descending
+    usersArray.sort((a, b) => b.totalSeconds - a.totalSeconds);
+
+    return res.json({
       message: "Extension day data fetched successfully",
-      date,
-      totalUsers: Object.keys(doc.users || {}).length,
-      data: doc,
+      date: doc.date,
+      totalUsers: usersArray.length,
+      meetingId: doc.meetingId || null,
+      tickAt: doc.tickAt || null,
+      createdAt: doc.createdAt || null,
+      updatedAt: doc.updatedAt || null,
+      users: usersArray,
     });
   } catch (err) {
     console.error("Error fetching extension-day data:", err);
-    res
+    return res
       .status(500)
       .json({
         error: "Error fetching extension-day data",
