@@ -55,8 +55,7 @@ app.post("/extension-data", async (req, res) => {
       usersMap = usersObj;
     }
 
-    // Upsert by date + meetingId: replace users snapshot and update tickAt.
-    const filter = { date, meetingId };
+    const filter = { date };
     const update = {
       $set: {
         tickAt,
