@@ -86,6 +86,41 @@ app.post("/extension-data", async (req, res) => {
   }
 });
 
+app.get("/extension-data/:date", async (req, res) => {
+  try {
+    const { date } = req.params;
+
+    if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return res
+        .status(400)
+        .json({ error: "Invalid or missing date (use YYYY-MM-DD)" });
+    }
+
+    const doc = await ExtensionDay.findOne({ date });
+
+    if (!doc) {
+      return res
+        .status(404)
+        .json({ message: "No data found for this date", date });
+    }
+
+    res.json({
+      message: "Extension day data fetched successfully",
+      date,
+      totalUsers: Object.keys(doc.users || {}).length,
+      data: doc,
+    });
+  } catch (err) {
+    console.error("Error fetching extension-day data:", err);
+    res
+      .status(500)
+      .json({
+        error: "Error fetching extension-day data",
+        details: err.message,
+      });
+  }
+});
+
 app.get("/admin-test", async (req, res) => {
   try {
     const users = await admin.auth().listUsers(1);
