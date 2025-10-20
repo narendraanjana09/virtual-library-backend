@@ -1,12 +1,22 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
+const cors = require("cors");
 const connectDB = require("./db");
 const admin = require("./firebase");
-const cors = require("cors");
-app.use(cors()); // or use custom middleware (Option B)
 
+const app = express();
 connectDB();
+
+// --- CORS setup (allow only your Chrome extension) ---
+const EXT = "chrome-extension://nlidadelmbpjhmgepbbmonaakpllnfga"; // replace with your actual ID
+app.use(
+  cors({
+    origin: EXT,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -135,12 +145,10 @@ app.get("/extension-data/:date", async (req, res) => {
     });
   } catch (err) {
     console.error("Error fetching extension-day data:", err);
-    return res
-      .status(500)
-      .json({
-        error: "Error fetching extension-day data",
-        details: err.message,
-      });
+    return res.status(500).json({
+      error: "Error fetching extension-day data",
+      details: err.message,
+    });
   }
 });
 
