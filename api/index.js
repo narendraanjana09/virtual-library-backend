@@ -7,14 +7,21 @@ const admin = require("./firebase");
 const app = express();
 connectDB();
 
-// --- CORS setup (allow only your Chrome extension) ---
-const EXT = "chrome-extension://nlidadelmbpjhmgepbbmonaakpllnfga"; // replace with your actual ID
+function allowChromeExtensionsAndNative(origin, callback) {
+  if (!origin) return callback(null, true);
+
+  if (typeof origin === "string" && origin.startsWith("chrome-extension://")) {
+    return callback(null, true);
+  }
+  return callback(new Error("Not allowed by CORS"), false);
+}
+
 app.use(
   cors({
-    origin: EXT,
+    origin: allowChromeExtensionsAndNative,
     methods: ["GET", "POST", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true,
+    credentials: true, // keep if you need cookies; otherwise set false
   })
 );
 
