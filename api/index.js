@@ -118,7 +118,7 @@ app.get("/extension-data/:date", async (req, res) => {
     if (!doc) {
       return res
         .status(404)
-        .json({ message: "No data found for this date", date });
+        .json({ error: `No data found for the date ${date}` });
     }
 
     // convert users map/object to array with only required fields
@@ -165,7 +165,6 @@ app.get("/extension-data/:date", async (req, res) => {
     console.error("Error fetching extension-day data:", err);
     return res.status(500).json({
       error: "Error fetching extension-day data",
-      details: err.message,
     });
   }
 });
