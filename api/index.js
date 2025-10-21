@@ -121,10 +121,9 @@ app.get("/extension-data/:date", async (req, res) => {
         .json({ error: `No data found for the date ${date}` });
     }
 
-    // convert users map/object to array with only required fields
     const usersObj = doc.users || {};
-    const usersArray = Object.keys(usersObj).map((k) => {
-      const u = usersObj[k] || usersObj.get?.(k) || {};
+    let usersArray = Object.keys(usersObj).map((k) => {
+      const u = usersObj[k] || (usersObj.get && usersObj.get(k)) || {};
       return {
         userId: u.userId || k,
         name: u.name || null,
@@ -137,9 +136,9 @@ app.get("/extension-data/:date", async (req, res) => {
       };
     });
 
-    // --- filter out unwanted users ---
+    // filter out unwanted users (case-insensitive)
     usersArray = usersArray.filter((u) => {
-      const name = (u.name || "").toLowerCase();
+      const name = (u.name || "").trim().toLowerCase();
       return (
         name !== "narendra singh anjana" &&
         !name.includes("narendra patel") &&
@@ -148,7 +147,6 @@ app.get("/extension-data/:date", async (req, res) => {
       );
     });
 
-    // optionally sort by totalSeconds descending
     usersArray.sort((a, b) => b.totalSeconds - a.totalSeconds);
 
     return res.json({
