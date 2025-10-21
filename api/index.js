@@ -152,7 +152,7 @@ app.get("/extension-data/:date", async (req, res) => {
     usersArray.sort((a, b) => b.totalSeconds - a.totalSeconds);
 
     return res.json({
-      message: "Extension day data fetched successfully",
+      message: "Leaderboard data fetched successfully",
       date: doc.date,
       totalUsers: usersArray.length,
       meetingId: doc.meetingId || null,
@@ -164,7 +164,7 @@ app.get("/extension-data/:date", async (req, res) => {
   } catch (err) {
     console.error("Error fetching extension-day data:", err);
     return res.status(500).json({
-      error: "Error fetching extension-day data",
+      error: `Error fetching leaderboard data ${err}`,
     });
   }
 });
