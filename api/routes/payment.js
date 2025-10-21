@@ -77,6 +77,8 @@ router.get("/pro-plans", verifyJWT, async (req, res) => {
 });
 
 router.post("/create-order", verifyJWT, async (req, res) => {
+  res.status(500).json({ error: "Failed to create Razorpay order" });
+  return;
   try {
     const { amount, planDurationInMonths } = req.body;
 
