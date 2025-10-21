@@ -137,6 +137,17 @@ app.get("/extension-data/:date", async (req, res) => {
       };
     });
 
+    // --- filter out unwanted users ---
+    usersArray = usersArray.filter((u) => {
+      const name = (u.name || "").toLowerCase();
+      return (
+        name !== "narendra singh anjana" &&
+        !name.includes("narendra patel") &&
+        !name.includes("merged") &&
+        !name.includes("virtual")
+      );
+    });
+
     // optionally sort by totalSeconds descending
     usersArray.sort((a, b) => b.totalSeconds - a.totalSeconds);
 
