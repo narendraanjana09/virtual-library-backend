@@ -47,6 +47,7 @@ app.get("/", (req, res) => {
 
 app.post("/extension-data", async (req, res) => {
   try {
+    console.log(`Extension data Received ${JSON.stringify(req.body)}`);
     const payload = req.body || {};
 
     // Accept payload.date if provided, otherwise compute server-side UTC date
