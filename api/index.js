@@ -195,5 +195,5 @@ app.get("/status", (req, res) => {
 
 const port = process.env.PORT || 8080;
 app.listen(port, () => {
-  `Server started on port ${port}`;
+  console.log(`Server started on port ${port}`);
 });
