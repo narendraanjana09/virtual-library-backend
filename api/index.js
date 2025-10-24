@@ -7,25 +7,26 @@ const admin = require("./firebase");
 const app = express();
 connectDB();
 
-// function allowChromeExtensionsAndNative(origin, callback) {
-//   if (!origin) return callback(null, true);
+function allowChromeExtensionsAndNative(origin, callback) {
+  console.log("CORS Origin:", origin);
+  if (!origin) return callback(null, true);
 
-//   if (typeof origin === "string" && origin.startsWith("chrome-extension://")) {
-//     return callback(null, true);
-//   }
-//   return callback(new Error("Not allowed by CORS"), false);
-// }
+  if (typeof origin === "string" && origin.startsWith("chrome-extension://")) {
+    return callback(null, true);
+  }
+  return callback(new Error("Not allowed by CORS"), false);
+}
 
-// app.use(
-//   cors({
-//     origin: allowChromeExtensionsAndNative,
-//     methods: ["GET", "POST", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     credentials: true, // keep if you need cookies; otherwise set false
-//   })
-// );
+app.use(
+  cors({
+    origin: allowChromeExtensionsAndNative,
+    methods: ["GET", "POST", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true, // keep if you need cookies; otherwise set false
+  })
+);
 
-app.use(cors());
+// app.use(cors());
 
 app.use(express.json());
 
