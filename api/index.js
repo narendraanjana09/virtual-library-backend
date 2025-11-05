@@ -7,25 +7,6 @@ const admin = require("./firebase");
 const app = express();
 connectDB();
 
-// function allowChromeExtensionsAndNative(origin, callback) {
-//   console.log("CORS Origin:", origin);
-//   if (!origin) return callback(null, true);
-
-//   if (typeof origin === "string" && origin.startsWith("chrome-extension://")) {
-//     return callback(null, true);
-//   }
-//   return callback(new Error("Not allowed by CORS"), false);
-// }
-
-// app.use(
-//   cors({
-//     origin: allowChromeExtensionsAndNative,
-//     methods: ["GET", "POST", "OPTIONS"],
-//     allowedHeaders: ["Content-Type", "Authorization"],
-//     credentials: true, // keep if you need cookies; otherwise set false
-//   })
-// );
-
 app.use(cors());
 
 app.use(express.json());
@@ -38,6 +19,11 @@ app.use("/auth", loginRoute);
 app.use("/auth", registerRoute);
 app.use("/home", home);
 app.use("/home", payment);
+const tasksRouter = require("./routes/tasks");
+const labelsRouter = require("./routes/labels");
+
+app.use("/api/tasks", tasksRouter);
+app.use("/api/labels", labelsRouter);
 
 const ExtensionDay = require("./models/ExtensionDay");
 
