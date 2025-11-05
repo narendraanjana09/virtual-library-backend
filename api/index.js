@@ -22,8 +22,8 @@ app.use("/home", payment);
 const tasksRouter = require("./routes/tasks");
 const labelsRouter = require("./routes/labels");
 
-app.use("/api/tasks", tasksRouter);
-app.use("/api/labels", labelsRouter);
+app.use("/tasks", tasksRouter);
+app.use("/labels", labelsRouter);
 
 const ExtensionDay = require("./models/ExtensionDay");
 
