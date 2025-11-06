@@ -43,16 +43,35 @@ router.post("/", verifyJWT, async (req, res) => {
 router.get("/", verifyJWT, async (req, res) => {
   try {
     const userUid = req.uid;
-    const { completed, labelId, q, page = 1, limit = 50 } = req.query;
+    const {
+      completed,
+      labelId,
+      q,
+      date,
+      fromDate,
+      toDate,
+      page = 1,
+      limit = 50,
+    } = req.query;
 
     const filter = { userUid };
 
     if (completed !== undefined) {
-      // treat "true"/"false" strings too
       filter.completed = completed === "true" || completed === true;
     }
     if (labelId) filter.labelId = labelId;
     if (q) filter.topic = { $regex: q, $options: "i" };
+
+    // --- ✅ NEW: date filtering ---
+    if (date) {
+      // exact date match
+      filter.date = date;
+    } else if (fromDate || toDate) {
+      // date range (string comparison if stored as "YYYY-MM-DD")
+      filter.date = {};
+      if (fromDate) filter.date.$gte = fromDate;
+      if (toDate) filter.date.$lte = toDate;
+    }
 
     const skip = (Math.max(1, Number(page)) - 1) * Number(limit);
     const [tasks, total] = await Promise.all([
