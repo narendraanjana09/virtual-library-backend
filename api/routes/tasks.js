@@ -32,7 +32,7 @@ router.post("/", verifyJWT, async (req, res) => {
       color,
     });
 
-    return res.status(201).json({ task });
+    return res.status(200).json({ task });
   } catch (err) {
     console.error("Create Task Error:", err);
     return res.status(500).json({ error: "Server error while creating task" });

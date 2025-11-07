@@ -19,7 +19,7 @@ router.post("/", verifyJWT, async (req, res) => {
         .json({ error: "label with this name already exists" });
 
     const label = await Label.create({ userUid, name });
-    return res.status(201).json({ label });
+    return res.status(200).json({ label });
   } catch (err) {
     console.error("Create Label Error:", err);
     return res.status(500).json({ error: "Server error while creating label" });
