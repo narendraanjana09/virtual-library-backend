@@ -139,6 +139,23 @@ router.put("/:id", verifyJWT, async (req, res) => {
   }
 });
 
+router.patch("/:id/toggle", verifyJWT, async (req, res) => {
+  try {
+    const userUid = req.uid;
+    const { id } = req.params;
+    const task = await Task.findOne({ id, userUid });
+    if (!task) return res.status(404).json({ error: "Task not found" });
+
+    task.completed = !task.completed;
+    await task.save();
+
+    return res.json({ task });
+  } catch (err) {
+    console.error("Toggle Task Error:", err);
+    return res.status(500).json({ error: "Server error while toggling task" });
+  }
+});
+
 // Delete task
 router.delete("/:id", verifyJWT, async (req, res) => {
   try {
